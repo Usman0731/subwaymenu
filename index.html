@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Subway Rahim Yar Khan – Table Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-deep:#00543d;
+    --green:#0a8a3f;
+    --yellow:#ffc600;
+    --cream:#fffaf0;
+    --ink:#1f2421;
+    --muted:#6b6f6d;
+    --line:#e7e1d2;
+    --radius:14px;
+    --shadow:0 4px 14px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:90px;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',sans-serif;}
+  button{font-family:inherit;}
+  button:focus-visible, input:focus-visible{outline:3px solid var(--green); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:var(--green-deep); color:#fff;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .brand img{height:36px; width:36px; object-fit:cover; border-radius:8px; background:#fff;}
+  .brand .name{font-weight:700; font-size:1.02rem; line-height:1.1; white-space:nowrap;}
+  .brand .tag{font-size:.68rem; color:#cfe8da; font-weight:500;}
+  #tableBadge{
+    background:var(--yellow); color:var(--green-deep);
+    font-weight:700; font-size:.82rem; padding:7px 14px;
+    border-radius:999px; border:none; text-align:center; flex-shrink:0;
+    width:108px;
+  }
+  #tableBadge.readonly{background:#fff; }
+
+  /* ---------- Category nav ---------- */
+  nav#catNav{
+    position:sticky; top:56px; z-index:49;
+    background:var(--cream); border-bottom:1px solid var(--line);
+    display:flex; gap:8px; overflow-x:auto; padding:10px 14px;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  nav#catNav::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0; padding:8px 16px; border-radius:999px;
+    border:1px solid var(--line); background:#fff; color:var(--ink);
+    font-weight:600; font-size:.83rem; cursor:pointer; white-space:nowrap;
+  }
+  .chip.active{background:var(--green); border-color:var(--green); color:#fff;}
+
+  /* ---------- Sections ---------- */
+  main{max-width:780px; margin:0 auto;}
+  .section-head{
+    margin:26px 14px 10px; display:flex; align-items:baseline; gap:10px;
+  }
+  .section-head h2{font-size:1.25rem; color:var(--green-deep); margin:0;}
+  .section-head .rule{height:3px; width:34px; background:var(--yellow); border-radius:2px;}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:12px; padding:0 14px 4px;
+  }
+  .card{
+    background:#fff; border-radius:var(--radius); overflow:hidden;
+    box-shadow:var(--shadow); display:flex; flex-direction:column;
+  }
+  .card img{width:100%; height:108px; object-fit:cover; display:block; background:#f1ede0;}
+  .card .body{padding:10px 10px 12px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .card .name{font-weight:600; font-size:.92rem; line-height:1.25;}
+  .card .price{font-weight:700; color:var(--green-deep); font-size:.92rem;}
+  .card .row{margin-top:auto; display:flex; align-items:center; justify-content:flex-end;}
+
+  .btn-add{
+    background:var(--green); color:#fff; border:none; padding:7px 14px;
+    border-radius:999px; font-weight:600; font-size:.78rem; cursor:pointer;
+  }
+  .stepper{display:flex; align-items:center; gap:8px;}
+  .stepper button{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--line);
+    background:#fff; color:var(--green-deep); font-weight:700; font-size:.95rem;
+    cursor:pointer; line-height:1;
+  }
+  .stepper span{font-weight:700; min-width:14px; text-align:center; font-size:.88rem;}
+
+  footer{max-width:780px; margin:30px auto 10px; padding:0 14px; color:var(--muted); font-size:.78rem; text-align:center;}
+
+  /* ---------- Floating cart button ---------- */
+  #cartFab{
+    position:fixed; right:16px; bottom:16px; z-index:60;
+    background:var(--green-deep); color:#fff; border:none;
+    padding:13px 18px; border-radius:999px; cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,.28);
+    display:flex; align-items:center; gap:10px; font-weight:700; font-size:.92rem;
+  }
+  #cartFab svg{width:18px; height:18px; fill:#fff;}
+  #cartFab .count{
+    background:var(--yellow); color:var(--green-deep); border-radius:999px;
+    font-size:.72rem; padding:2px 7px; font-weight:800;
+  }
+
+  /* ---------- Overlay / sheets ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:80;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .overlay.open{display:flex;}
+  .sheet{
+    position:relative; background:var(--cream); width:100%; max-width:480px;
+    max-height:85vh; overflow-y:auto; border-radius:20px 20px 0 0;
+    padding:24px 18px 20px;
+  }
+  .sheet::before{
+    content:""; position:absolute; top:-9px; left:0; right:0; height:10px;
+    background:
+      linear-gradient(135deg, var(--cream) 50%, transparent 50%),
+      linear-gradient(45deg, var(--cream) 50%, transparent 50%);
+    background-size:16px 16px; background-position:0 0, 8px 0; background-repeat:repeat-x;
+  }
+  .sheet .close{
+    position:absolute; top:14px; right:14px; background:none; border:none;
+    font-size:1.3rem; color:var(--muted); cursor:pointer; line-height:1;
+  }
+  .sheet h3{margin:0 0 4px; color:var(--green-deep); font-size:1.2rem;}
+
+  /* ---------- Customize modal specifics ---------- */
+  .group{margin-top:16px;}
+  .group .label{font-weight:700; font-size:.85rem; color:var(--ink); margin-bottom:8px;}
+  .pillrow{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{
+    padding:7px 13px; border-radius:999px; border:1px solid var(--line);
+    background:#fff; font-size:.8rem; cursor:pointer; user-select:none;
+  }
+  .pill.sel{background:var(--green); border-color:var(--green); color:#fff;}
+  .addon-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line); font-size:.86rem;}
+  .addon-row label{display:flex; align-items:center; gap:10px; cursor:pointer;}
+  .addon-row .p{color:var(--green-deep); font-weight:600;}
+  .modal-footer{
+    position:sticky; bottom:-20px; background:var(--cream); margin:18px -18px -20px;
+    padding:14px 18px; border-top:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .total-pill{font-weight:800; color:var(--green-deep); font-size:1.02rem;}
+  .btn-yellow{
+    background:var(--yellow); color:var(--green-deep); border:none; font-weight:800;
+    padding:13px 0; border-radius:999px; font-size:.95rem; cursor:pointer; width:100%;
+  }
+  .btn-yellow:disabled{background:#e8e2d2; color:#a6a098; cursor:not-allowed;}
+
+  /* ---------- Cart sheet specifics ---------- */
+  .cart-row{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);}
+  .cart-row .info{flex:1; min-width:0;}
+  .cart-row .info .nm{font-weight:600; font-size:.92rem;}
+  .cart-row .info .cz{color:var(--muted); font-size:.74rem; margin-top:2px; line-height:1.3;}
+  .cart-row .lt{font-weight:700; color:var(--green-deep); font-size:.88rem; white-space:nowrap;}
+  .remove{background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:0 4px;}
+  .empty-cart{text-align:center; color:var(--muted); padding:30px 10px; font-size:.92rem;}
+  .table-field{margin-top:18px;}
+  .table-field label{font-weight:700; font-size:.85rem;}
+  .table-field input{
+    width:100%; margin-top:8px; border:none; border-bottom:2px dashed var(--line);
+    background:transparent; font-size:1rem; padding:8px 2px; color:var(--ink);
+  }
+  .table-field .locked{
+    margin-top:8px; display:inline-block; background:var(--green); color:#fff;
+    padding:8px 16px; border-radius:999px; font-weight:700; font-size:.9rem;
+  }
+  .totals{margin-top:14px;}
+  .totals .line{display:flex; justify-content:space-between; font-size:.9rem; padding:3px 0; color:var(--muted);}
+  .totals .grand{
+    display:flex; justify-content:space-between; font-weight:800; font-size:1.1rem;
+    color:var(--green-deep); border-top:2px dashed var(--line); margin-top:8px; padding-top:10px;
+  }
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--green-deep); color:#fff; padding:11px 20px; border-radius:999px;
+    font-size:.88rem; font-weight:600; opacity:0; transition:opacity .25s, transform .25s;
+    z-index:90; pointer-events:none; text-align:center; max-width:90vw;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="https://subwayryk.com/subway-logo.png" alt="Subway logo">
+    <div>
+      <div class="name">Subway RYK</div>
+      <div class="tag">Table Menu</div>
+    </div>
+  </div>
+  <input id="tableBadge" placeholder="Table No." inputmode="numeric" maxlength="6">
+</header>
+
+<nav id="catNav"></nav>
+
+<main id="menuMain"></main>
+
+<footer>Club Road, Businessman Colony, Rahim Yar Khan &middot; +92 321 1782929</footer>
+
+<button id="cartFab" aria-label="Open cart">
+  <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM7.2 14h9.6c.75 0 1.41-.41 1.75-1.03l3.24-6.04A1 1 0 0 0 20.91 5H5.21l-.4-1.6A1 1 0 0 0 3.84 2.6H1v2h2l3.4 7.6-1.02 1.85A1 1 0 0 0 6.2 16h12v-2H7.2z"/></svg>
+  <span id="fabLabel">Cart</span>
+  <span class="count" id="fabCount">0</span>
+</button>
+
+<!-- Customize overlay -->
+<div class="overlay" id="customizeOverlay">
+  <div class="sheet">
+    <button class="close" id="customizeClose" aria-label="Close">✕</button>
+    <h3 id="czName">Item</h3>
+    <div class="label" style="color:var(--muted); font-size:.85rem; font-weight:600;" id="czBase">Base price: Rs 0</div>
+
+    <div class="group">
+      <div class="label">Select Bread</div>
+      <div class="pillrow" id="czBread"></div>
+    </div>
+    <div class="group">
+      <div class="label">Select Veggies</div>
+      <div class="pillrow" id="czVeg"></div>
+    </div>
+    <div class="group">
+      <div class="label">Select Sauce</div>
+      <div class="pillrow" id="czSauce"></div>
+    </div>
+    <div class="group">
+      <div class="label">Add Ons</div>
+      <div id="czAddons"></div>
+    </div>
+    <div class="group">
+      <div class="label">Combo</div>
+      <div id="czCombo"></div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="stepper">
+        <button id="czMinus">−</button>
+        <span id="czQty">1</span>
+        <button id="czPlus">+</button>
+      </div>
+      <div class="total-pill" id="czTotal">Rs 0</div>
+    </div>
+    <button class="btn-yellow" id="czAddBtn" style="margin-top:10px;">Add to Cart</button>
+  </div>
+</div>
+
+<!-- Cart overlay -->
+<div class="overlay" id="cartOverlay">
+  <div class="sheet">
+    <button class="close" id="cartClose" aria-label="Close">✕</button>
+    <h3>Your Order</h3>
+    <div id="cartList"></div>
+    <div class="totals" id="cartTotals" style="display:none;">
+      <div class="grand"><span>Total</span><span id="cartGrand">Rs 0</span></div>
+    </div>
+    <div class="table-field" id="tableFieldWrap">
+      <label>Table Number</label>
+      <input id="tableInput" placeholder="e.g. 7" inputmode="numeric">
+    </div>
+    <button class="btn-yellow" id="sendOrderBtn" style="margin-top:16px;">Send Order to Waiter</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ---------------- Menu data (matches subwayryk.com) ---------------- */
+const IMG = n => "https://subwayryk.com/" + n;
+const sub = (name,size,price,img) => ({name,size,price,img:IMG(img),type:'sub'});
+const simple = (name,price,img,size="") => ({name,size,price,img:IMG(img),type:'simple'});
+
+const MENU = [
+  {id:"classic", label:"Classic", items:[
+    sub("Roasted Chicken",'SIX"',700,"roasted.jpg"),
+    sub("Roasted Chicken",'12"',1320,"roasted.jpg"),
+    sub("Chicken Chapli",'SIX"',700,"chapli.jpg"),
+    sub("Chicken Chapli",'12"',1320,"chapli.jpg"),
+    sub("Chicken Mughlai",'SIX"',700,"mughlai.jpeg"),
+    sub("Chicken Mughlai",'12"',1320,"mughlai.jpeg"),
+    sub("Veggie Delite",'SIX"',550,"veggiedelite.png"),
+    sub("Veggie Delite",'12"',1050,"veggiedelite.png"),
+  ]},
+  {id:"favorites", label:"Local Favorites", items:[
+    sub("Chicken Tikka",'SIX"',750,"tikka.jpg"),
+    sub("Chicken Tikka",'12"',1420,"tikka.jpg"),
+    sub("Chicken Fajita",'SIX"',750,"fajita.jpg"),
+    sub("Chicken Fajita",'12"',1420,"fajita.jpg"),
+  ]},
+  {id:"super", label:"Super Subs", items:[
+    sub("Chicken BBQ",'SIX"',790,"BBQ.jpg"),
+    sub("Chicken BBQ",'12"',1500,"BBQ.jpg"),
+    sub("Chicken Teriyaki",'SIX"',790,"teriyaki.jpg"),
+    sub("Chicken Teriyaki",'12"',1500,"teriyaki.jpg"),
+  ]},
+  {id:"signature", label:"Signatures", items:[
+    sub("Italian B.M.T",'SIX"',1420,"bmt.png"),
+    sub("Italian B.M.T",'12"',2690,"bmt.png"),
+    sub("Steak & Cheese",'SIX"',1420,"steak.jpg"),
+    sub("Steak & Cheese",'12"',2690,"steak.jpg"),
+    sub("Turkey Breast",'SIX"',1420,"turkey.jpg"),
+    sub("Turkey Breast",'12"',2690,"turkey.jpg"),
+    sub("Tuna Fish",'SIX"',1420,"tuna.jpg"),
+    sub("Tuna Fish",'12"',2690,"tuna.jpg"),
+  ]},
+  {id:"salads", label:"Salads", items:[
+    sub("Tikka Salad","",810,"tikkasalad.jpg"),
+    sub("Fajita Salad","",810,"fajitasalad.jpg"),
+    sub("BBQ Salad","",850,"bbqsalad.jpg"),
+    sub("Teriyaki Salad","",850,"teriyakisalad.jpg"),
+    sub("Chapli Salad","",760,"chaplisalad.jpg"),
+    sub("Mughlai Salad","",760,"mughlaisalad.jpg"),
+    sub("RCB Salad","",760,"rcbsalad.jpg"),
+    sub("B.M.T Salad","",1480,"bmtsalad.jpg"),
+    sub("Turkey Salad","",1480,"turkeysalad.jpg"),
+    sub("Beef Steak Salad","",1480,"steaksalad.jpg"),
+    sub("Tuna Salad","",1480,"tunasalad.jpg"),
+  ]},
+  {id:"drinks", label:"Drinks", items:[
+    simple("7up",110,"7up.png",'345ml'),
+    simple("Pepsi",110,"pepsi.png",'345ml'),
+    simple("Zero 7up",125,"zero7up.jpg",'250ml'),
+    simple("Zero Pepsi",125,"zeropep.jpg",'250ml'),
+    simple("Dew",110,"dew.jpg",'345ml'),
+    simple("Marinda",110,"marinda.jpg",'345ml'),
+    simple("Mango Juice",180,"glass.jpg"),
+    simple("Peach Juice",180,"glass.jpg"),
+    simple("Pineapple Juice",180,"glass.jpg"),
+    simple("Lemon Juice",180,"glass.jpg"),
+  ]},
+  {id:"cookies", label:"Cookies", items:[
+    simple("Chocolate Chip",300,"cookie.jpg"),
+    simple("Double Chocolate Chip",300,"cookie2.jpg"),
+  ]},
+];
+
+const BREADS = ["Oregano","Italian","Sesame","Honey Oat","Wheat"];
+const VEGGIES = ["Lettuce","Tomato","Cucumber","Pickle","Onion","Jalapeno","Olives","Capsicum"];
+const SAUCES = ["Ketchup","Mustard","Mayonnaise","Chilli sauce","Honey mustard","Thousand island","Chipotle Southwest","Bar B Q","Olive Oil"];
+const ADDONS = [{name:"Extra Cheese",price:90},{name:"Double Chicken",price:250},{name:"Double Meat",price:900}];
+const COMBO = {name:"Cookie + Cold Drink",price:400};
+const WHATSAPP_NUMBER = "923211782929";
+
+/* ---------------- State ---------------- */
+let cart = [];          // {key, name, size, qty, unitPrice, custom:{bread,veggies,sauces,addons,combo} | null}
+let simpleQty = {};      // key -> qty, mirrors cart entries for simple items
+let activeItem = null;   // item being customized
+let czState = {bread:BREADS[0], veggies:[], sauces:[], addons:[], combo:false, qty:1};
+
+/* ---------------- Render menu ---------------- */
+const nav = document.getElementById('catNav');
+const main = document.getElementById('menuMain');
+
+MENU.forEach((cat,ci)=>{
+  const chip = document.createElement('button');
+  chip.className = 'chip' + (ci===0 ? ' active' : '');
+  chip.textContent = cat.label;
+  chip.onclick = ()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    document.getElementById('sec-'+cat.id).scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  nav.appendChild(chip);
+
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  head.id = 'sec-'+cat.id;
+  head.innerHTML = `<h2>${cat.label}</h2><div class="rule"></div>`;
+  main.appendChild(head);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  main.appendChild(grid);
+  cat.items.forEach((item,ii)=>{
+    const key = cat.id+'-'+ii;
+    item._key = key;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${item.img}" alt="${item.name}" loading="lazy">
+      <div class="body">
+        <div class="name">${item.name}${item.size? ' '+item.size:''}</div>
+        <div class="price">Rs ${item.price}</div>
+        <div class="row" id="row-${key}"></div>
+      </div>`;
+    grid.appendChild(card);
+    renderRow(item);
+  });
+});
+
+function renderRow(item){
+  const row = document.getElementById('row-'+item._key);
+  if(item.type === 'sub'){
+    row.innerHTML = `<button class="btn-add">Customize & Order</button>`;
+    row.querySelector('button').onclick = ()=>openCustomize(item);
+  } else {
+    const qty = simpleQty[item._key] || 0;
+    if(qty === 0){
+      row.innerHTML = `<button class="btn-add">Add</button>`;
+      row.querySelector('button').onclick = ()=>setSimpleQty(item, 1);
+    } else {
+      row.innerHTML = `<div class="stepper">
+        <button data-d="-1">−</button><span>${qty}</span><button data-d="1">+</button>
+      </div>`;
+      row.querySelectorAll('button').forEach(b=>{
+        b.onclick = ()=> setSimpleQty(item, qty + parseInt(b.dataset.d));
+      });
+    }
+  }
+}
+
+function setSimpleQty(item, newQty){
+  newQty = Math.max(0, newQty);
+  simpleQty[item._key] = newQty;
+  cart = cart.filter(c=>c.key !== item._key);
+  if(newQty > 0){
+    cart.push({key:item._key, name:item.name, size:item.size, qty:newQty, unitPrice:item.price, custom:null});
+  }
+  renderRow(item);
+  updateFab();
+  renderCart();
+}
+
+/* ---------------- Customize modal ---------------- */
+const customizeOverlay = document.getElementById('customizeOverlay');
+function openCustomize(item){
+  activeItem = item;
+  czState = {bread:BREADS[0], veggies:[], sauces:[], addons:[], combo:false, qty:1};
+  document.getElementById('czName').textContent = item.name + (item.size? ' '+item.size:'');
+  document.getElementById('czBase').textContent = 'Base price: Rs ' + item.price;
+
+  buildPills('czBread', BREADS, czState.bread, null, true);
+  buildPills('czVeg', VEGGIES, czState.veggies, null, false);
+  buildPills('czSauce', SAUCES, czState.sauces, null, false);
+
+  const addonsEl = document.getElementById('czAddons');
+  addonsEl.innerHTML = ADDONS.map((a,i)=>`
+    <div class="addon-row">
+      <label><input type="checkbox" data-i="${i}" class="addon-cb"> ${a.name}</label>
+      <span class="p">+Rs ${a.price}</span>
+    </div>`).join('');
+  addonsEl.querySelectorAll('.addon-cb').forEach(cb=>{
+    cb.onchange = ()=>{
+      const a = ADDONS[cb.dataset.i];
+      if(cb.checked) czState.addons.push(a.name);
+      else czState.addons = czState.addons.filter(n=>n!==a.name);
+      refreshCzTotal();
+    };
+  });
+
+  const comboEl = document.getElementById('czCombo');
+  comboEl.innerHTML = `
+    <div class="addon-row">
+      <label><input type="checkbox" id="comboCb"> ${COMBO.name}</label>
+      <span class="p">+Rs ${COMBO.price}</span>
+    </div>`;
+  document.getElementById('comboCb').onchange = (e)=>{ czState.combo = e.target.checked; refreshCzTotal(); };
+
+  document.getElementById('czQty').textContent = czState.qty;
+  refreshCzTotal();
+  customizeOverlay.classList.add('open');
+}
+
+function buildPills(containerId, options, selected, onClickExtra, singleSelect){
+  const el = document.getElementById(containerId);
+  el.innerHTML = options.map(o=>{
+    const isSel = singleSelect ? (o===selected) : selected.includes(o);
+    return `<button type="button" class="pill ${isSel?'sel':''}" data-v="${o}">${o}</button>`;
+  }).join('');
+  el.querySelectorAll('.pill').forEach(p=>{
+    p.onclick = ()=>{
+      const v = p.dataset.v;
+      if(containerId === 'czBread'){
+        czState.bread = v;
+        buildPills('czBread', BREADS, v, null, true);
+      } else if(containerId === 'czVeg'){
+        toggleMulti(czState.veggies, v);
+        buildPills('czVeg', VEGGIES, czState.veggies, null, false);
+      } else if(containerId === 'czSauce'){
+        toggleMulti(czState.sauces, v);
+        buildPills('czSauce', SAUCES, czState.sauces, null, false);
+      }
+      refreshCzTotal();
+    };
+  });
+}
+function toggleMulti(arr, val){
+  const i = arr.indexOf(val);
+  if(i>-1) arr.splice(i,1); else arr.push(val);
+}
+
+function czUnitPrice(){
+  let p = activeItem.price;
+  czState.addons.forEach(name=>{ p += ADDONS.find(a=>a.name===name).price; });
+  if(czState.combo) p += COMBO.price;
+  return p;
+}
+function refreshCzTotal(){
+  document.getElementById('czTotal').textContent = 'Rs ' + (czUnitPrice() * czState.qty);
+}
+document.getElementById('czMinus').onclick = ()=>{ czState.qty = Math.max(1, czState.qty-1); document.getElementById('czQty').textContent = czState.qty; refreshCzTotal(); };
+document.getElementById('czPlus').onclick = ()=>{ czState.qty += 1; document.getElementById('czQty').textContent = czState.qty; refreshCzTotal(); };
+document.getElementById('customizeClose').onclick = ()=> customizeOverlay.classList.remove('open');
+
+document.getElementById('czAddBtn').onclick = ()=>{
+  const unit = czUnitPrice();
+  const signature = JSON.stringify({k:activeItem._key, b:czState.bread, v:[...czState.veggies].sort(), s:[...czState.sauces].sort(), a:[...czState.addons].sort(), c:czState.combo});
+  const existing = cart.find(c => c.sig === signature);
+  if(existing){
+    existing.qty += czState.qty;
+  } else {
+    cart.push({
+      key: activeItem._key + '-' + Date.now(),
+      sig: signature,
+      name: activeItem.name, size: activeItem.size,
+      qty: czState.qty, unitPrice: unit,
+      custom: {bread:czState.bread, veggies:[...czState.veggies], sauces:[...czState.sauces], addons:[...czState.addons], combo:czState.combo}
+    });
+  }
+  customizeOverlay.classList.remove('open');
+  updateFab();
+  renderCart();
+  showToast(activeItem.name + ' added to cart');
+};
+
+/* ---------------- Cart ---------------- */
+const cartOverlay = document.getElementById('cartOverlay');
+document.getElementById('cartFab').onclick = ()=>{ renderCart(); cartOverlay.classList.add('open'); };
+document.getElementById('cartClose').onclick = ()=> cartOverlay.classList.remove('open');
+
+function cartCount(){ return cart.reduce((s,c)=>s+c.qty,0); }
+function cartTotal(){ return cart.reduce((s,c)=>s+c.qty*c.unitPrice,0); }
+
+function updateFab(){
+  document.getElementById('fabCount').textContent = cartCount();
+  document.getElementById('fabLabel').textContent = 'Cart · Rs ' + cartTotal();
+}
+
+function renderCart(){
+  const list = document.getElementById('cartList');
+  const totalsWrap = document.getElementById('cartTotals');
+  if(cart.length === 0){
+    list.innerHTML = '<div class="empty-cart">Your cart is empty. Add something tasty from the menu!</div>';
+    totalsWrap.style.display = 'none';
+  } else {
+    list.innerHTML = cart.map(c=>{
+      let czParts = [];
+      if(c.custom){
+        if(c.custom.bread) czParts.push('Bread: '+c.custom.bread);
+        if(c.custom.veggies.length) czParts.push('Veggies: '+c.custom.veggies.join(', '));
+        if(c.custom.sauces.length) czParts.push('Sauce: '+c.custom.sauces.join(', '));
+        if(c.custom.addons.length) czParts.push(c.custom.addons.join(', '));
+        if(c.custom.combo) czParts.push('Combo: '+COMBO.name);
+      }
+      return `<div class="cart-row">
+        <div class="info">
+          <div class="nm">${c.qty}x ${c.name}${c.size? ' '+c.size:''}</div>
+          ${czParts.length? `<div class="cz">${czParts.join(' &middot; ')}</div>`:''}
+        </div>
+        <div class="lt">Rs ${c.qty*c.unitPrice}</div>
+        <button class="remove" data-key="${c.key}" aria-label="Remove">✕</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.remove').forEach(b=>{
+      b.onclick = ()=>{
+        const item = cart.find(c=>c.key===b.dataset.key);
+        if(item && !item.custom){ simpleQty[item.key] = 0; }
+        cart = cart.filter(c=>c.key !== b.dataset.key);
+        // refresh any simple card row that matches
+        MENU.forEach(cat=>cat.items.forEach(it=>{ if(it._key === (item&&item.key)) renderRow(it); }));
+        updateFab(); renderCart();
+      };
+    });
+    totalsWrap.style.display = 'block';
+    document.getElementById('cartGrand').textContent = 'Rs ' + cartTotal();
+  }
+}
+
+/* ---------------- Table number ---------------- */
+const params = new URLSearchParams(location.search);
+const urlTable = params.get('table');
+const tableBadge = document.getElementById('tableBadge');
+const tableFieldWrap = document.getElementById('tableFieldWrap');
+const tableInput = document.getElementById('tableInput');
+
+if(urlTable){
+  tableBadge.outerHTML = `<div id="tableBadge" class="readonly">Table ${urlTable}</div>`;
+  tableFieldWrap.innerHTML = `<label>Table Number</label><div class="locked">Table ${urlTable} ✓</div>`;
+} else {
+  tableBadge.addEventListener('input', ()=>{ tableInput.value = tableBadge.value; });
+  tableInput.addEventListener('input', ()=>{ tableBadge.value = tableInput.value; });
+}
+
+function getTableNumber(){
+  if(urlTable) return urlTable;
+  return tableInput.value.trim();
+}
+
+/* ---------------- Send order ---------------- */
+document.getElementById('sendOrderBtn').onclick = ()=>{
+  if(cart.length === 0){ showToast('Your cart is empty'); return; }
+  const table = getTableNumber();
+  if(!table){ showToast('Please enter your table number'); tableInput && tableInput.focus(); return; }
+
+  const lines = cart.map(c=>{
+    let label = c.name + (c.size? ' '+c.size : '');
+    let czParts = [];
+    if(c.custom){
+      if(c.custom.bread) czParts.push('Bread: '+c.custom.bread);
+      if(c.custom.veggies.length) czParts.push('Veggies: '+c.custom.veggies.join(', '));
+      if(c.custom.sauces.length) czParts.push('Sauce: '+c.custom.sauces.join(', '));
+      if(c.custom.addons.length) czParts.push(c.custom.addons.join(', '));
+      if(c.custom.combo) czParts.push('Combo: '+COMBO.name);
+    }
+    const czStr = czParts.length ? ' ('+czParts.join(' | ')+')' : '';
+    return `${c.qty}x ${label}${czStr} - Rs ${c.qty*c.unitPrice}`;
+  });
+
+  const msg = `New Order - Subway Rahim Yar Khan\nTable: ${table}\n\n${lines.join('\n')}\n\nTotal: Rs ${cartTotal()}\n\nPlease confirm. Thank you!`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+  showToast('Order sent! Show this screen to your waiter if needed.');
+  cart = [];
+  simpleQty = {};
+  MENU.forEach(cat=>cat.items.forEach(it=>{ if(it.type==='simple') renderRow(it); }));
+  updateFab();
+  renderCart();
+  cartOverlay.classList.remove('open');
+};
+
+/* ---------------- Toast ---------------- */
+let toastTimer;
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+updateFab();
+</script>
+</body>
+</html>
